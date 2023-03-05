@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform game</title>
+</head>
+<body>
+    <div id="canvas" oncontextmenu="return false;">
+        <div>
+            <img src="Pixel Adventure 1/Background/GrayBig.png"  style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0px;
+                left: 0px;
+                width: 100%;
+            "/>
+            <img src="Pixel Adventure 1/Menu/Menu.png" style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            "/>
+        </div>
+        <img id="soundImg" src="Pixel Adventure 1/Menu/Buttons/Volume.png" style="
+            position: absolute;
+            display: block;
+            margin-left: 35%;    
+            margin-right: 65%;
+            margin-top: 20%;
+            width: 128px;
+            image-rendering: pixelated;
+        "/>
+        <input id="sound" type="image" src="Pixel Adventure 1/Menu/Buttons/Check.png" style="
+            position: absolute;
+            display: block;
+            margin-left: 60%;    
+            margin-right: 40%;
+            margin-top: 20%;
+            width: 128px;
+            image-rendering: pixelated;
+        "/>
+        <a href="index.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Close.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 90%;    
+                margin-right: 10%;
+                margin-top: 0%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+    </div>
+    <script>
+        let sound = window.document.querySelector('#sound');
+        let canvas = window.document.querySelector('#canvas');
+        let soundOn = (localStorage.getItem("soundOn") === 'true');
+        let backgroundMusic = new Audio("Pixel Adventure 1/playlist/2.wav");
+        backgroundMusic.loop = true;
+        if(!soundOn){
+            sound.src = "Pixel Adventure 1/Menu/Buttons/Empty.png";
+        } else {
+            window.onmousedown = () => {
+                if(soundOn){
+                    backgroundMusic.play();
+                    backgroundMusic.loop = true;
+                }
+            }
+        }
+        sound.onclick = () => {
+            soundOn = (localStorage.getItem("soundOn") === 'true');
+            if(soundOn){
+                localStorage.setItem("soundOn", "false")
+                backgroundMusic.pause();
+                sound.src = "Pixel Adventure 1/Menu/Buttons/Empty.png";
+            } else {
+                localStorage.setItem("soundOn", "true")
+                backgroundMusic.play();
+                sound.src = "Pixel Adventure 1/Menu/Buttons/Check.png";
+            }
+        }
+    </script>
+</body>
+</html>

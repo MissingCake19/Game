@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Game</title>
+</head>
+<body>
+    <div id="canvas" oncontextmenu="return false;">
+        <div>
+            <img src="Pixel Adventure 1/Background/BlueBig.png"  style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0px;
+                left: 0px;
+                width: 100%;
+            "/>
+            <img src="Pixel Adventure 1/Menu/Start.png" style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            "/>
+        </div>
+        <a href="level1.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Play.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 45%;    
+                margin-right: 45%;
+                margin-top: 25%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+        <a href="settings.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Settings.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 35%;    
+                margin-right: 55%;
+                margin-top: 25%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+        <a href="levelMenu.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Levels.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 55%;    
+                margin-right: 35%;
+                margin-top: 25%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+    </div>
+    <script>
+        let soundOn = (localStorage.getItem("soundOn") === 'true');
+        let backgroundMusic = new Audio("Pixel Adventure 1/playlist/1.wav");
+        window.onmousedown = () => {
+            if(soundOn){
+                backgroundMusic.play();
+                backgroundMusic.loop = true;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Game</title>
+</head>
+<body>
+    <div id="canvas" oncontextmenu="return false;">
+        <div>
+            <img src="Pixel Adventure 1/Background/BlueBig.png"  style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0px;
+                left: 0px;
+                width: 100%;
+            "/>
+        </div>
+        <div id="img-Block" style="
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        position: absolute;
+        left: 128px;
+        bottom: 64px;
+        "><img id="hero-img" style="
+            width: 768px;
+            height: 320px;
+            top: 0px;
+            left: -64px;  
+            position: relative;
+            
+            " src="Pixel Adventure 1/Main Characters/Ninja Frog/All.png"/>
+        </div>
+        <a href="settings.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Settings.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 90%;    
+                margin-right: 10%;
+                margin-top: 0%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+        <a href="levelMenu.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Levels.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 80%;    
+                margin-right: 20%;
+                margin-top: 0%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+        <a href="level1.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Restart.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 70%;    
+                margin-right: 30%;
+                margin-top: 0%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+        <a href="level2.html">
+            <input type="image" src="Pixel Adventure 1/Menu/Buttons/Next.png" style="
+                position: absolute;
+                display: block;
+                margin-left: 60%;    
+                margin-right: 40%;
+                margin-top: 0%;
+                width: 128px;
+                image-rendering: pixelated;
+            "/>
+        </a>
+    </div>
+    <script>
+        //-65
+        //Змінні
+        let rightPosition = 0;
+        let imgBlockPosition = 0;
+        let direction = "right";
+        let jump = false;
+        let timer = null;
+        let fall = false;
+        let x = 0;
+        let halfWidth = window.screen.width / 2;
+        let tileArray = [];
+        let heroX;
+        let heroY;
+        let soundOn = (localStorage.getItem("soundOn") === 'true');
+        let backgroundMusic = new Audio("Pixel Adventure 1/playlist/4.wav");
+        let isWallRight = false;
+        let isWallLeft = false;
+
+        let hero = window.document.querySelector('#hero-img');
+        let imgBlock = window.document.querySelector('#img-Block');
+        let canvas = window.document.querySelector('#canvas');
+        let info = window.document.querySelector('#info');
+        
+        //Функції
+        hero.onclick = (event) => {
+            event.preventDefault();
+        }
+
+        const updateHeroXY = () => {
+            heroX = Math.ceil((Number.parseInt(imgBlock.style.left)+32)/32);
+            heroY = Math.ceil((Number.parseInt(imgBlock.style.bottom))/32);
+        }
+
+        const checkFalling = () => {
+            updateHeroXY();
+            let isFalling = true;
+            for(let i = 0; i < tileArray.length; i++){
+                tileArray[i][0]
+                if (tileArray[i][0] === heroX && tileArray[i][1]+1 === heroY){
+                    isFalling = false;
+                }
+            }
+            if(isFalling){
+                fall = true;
+            } else {
+                fall = false;
+            }
+        }
+
+        const fallHandler = () => {
+            hero.style.top = '-192px';
+            hero.style.left = '0px';
+            switch(direction){
+                case 'right':{
+                    hero.style.left = '0px';
+                    break;
+                }
+                case 'left':{
+                    hero.style.left = '-704px';
+                    break;
+                }
+                default: break;
+            }
+            imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)-5}px`;
+            checkFalling();
+        }
+
+        const rightHandler = () => {
+            if(!fall){
+                hero.style.transform = "scale(1,1)";
+                rightPosition = rightPosition + 1;
+                if(rightPosition > 11) rightPosition = 0;
+                imgBlockPosition = imgBlockPosition + 1;
+                hero.style.left = `${rightPosition*-64}px`;
+                hero.style.top = '-65px';
+                imgBlock.style.left = `${imgBlockPosition * 10}px`;
+                checkFalling();
+                
+            } else {
+                fallHandler();
+            }
+        }
+        const leftHandler = () => {
+            if(!fall){
+                hero.style.transform = "scale(-1,1)";
+                rightPosition = rightPosition + 1;
+                if(rightPosition > 11) rightPosition = 0;
+                imgBlockPosition = imgBlockPosition - 1;
+                hero.style.left = `${rightPosition*-64}px`;
+                hero.style.top = '-65px';
+                imgBlock.style.left = `${imgBlockPosition*10}px`;
+                checkFalling();
+            } else {
+                fallHandler();
+            }
+        }
+        const standHandler = () => {
+            switch(direction){
+                case 'right':{
+                    hero.style.transform = "scale(1,1)";
+                    if(rightPosition > 9) rightPosition = 1;
+                    break;
+                }
+                case 'left':{
+                    hero.style.transform = "scale(-1,1)";
+                    if(rightPosition > 9) rightPosition = 1;
+                    break;
+                }
+                default: break;
+            }
+            
+            rightPosition = rightPosition + 1;
+            hero.style.left = `${rightPosition*-64}px`;
+            hero.style.top = '0px';
+            checkFalling();
+        }
+        const jumpHandler = () => {
+            switch(direction){
+                case 'right':{
+                    hero.style.transform = "scale(1,1)";
+                    hero.style.left = '0px';
+                    imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)+160}px`;
+                    jump = false;
+                    break;
+                }
+                case 'left':{
+                    hero.style.transform = "scale(-1,1)";
+                    hero.style.left = '-704px';
+                    imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)+160}px`;
+                    jump = false;
+                    break;
+                }
+                default: break;
+            }
+            hero.style.top = '-128px';
+        }
+        //Обробник івентів
+
+        window.addEventListener('keydown', (event) => {
+            if(soundOn){
+                backgroundMusic.play();
+                backgroundMusic.loop = true;
+            }
+            if(!event.repeat){
+                clearInterval(timer);
+                timer = setInterval(()=>{
+                    if(event.code === 'KeyD') {
+                        direction = 'right';
+                        rightHandler();
+                    } else if (event.code === 'KeyA'){
+                        direction = 'left';
+                        leftHandler();
+                    } 
+                },65)
+            }
+            
+        })
+        window.addEventListener('keyup', (event) => {
+            if (event.code === 'Space'){
+                jump = true;    
+            }
+            clearInterval(timer);
+            lifeCycle();
+        })
+
+        const lifeCycle = () => {
+            timer = setInterval(()=>{
+                if (jump){
+                    jumpHandler();
+                } else if (fall){
+                    fallHandler();
+                }
+                else standHandler();
+            }, 80)
+        }
+
+        const createTile = (x, y = 1, src) => {
+            let tile = window.document.createElement('img');
+            tile.src = src;
+            tile.style.position = 'absolute';
+            tile.style.bottom = '32px';
+            tile.width = 32;
+            tile.height = 32;
+            tile.style.left = x*32 + 'px';
+            tile.style.bottom = y*32 + 'px';
+            canvas.appendChild(tile);
+            tileArray.push([x, y]);
+        }
+
+        const buildLevel = () =>{
+            createTile(0, 0, "Pixel Adventure 1/Terrain/row-2-column-4.png");
+            for(let i = 1; i < 23; i++){
+                createTile(0, i, "Pixel Adventure 1/Terrain/row-2-column-3.png");
+            }
+            for(let i = 1; i < 46; i++){
+                createTile(i, 0, "Pixel Adventure 1/Terrain/row-1-column-2.png");
+            }
+            createTile(46, 0, "Pixel Adventure 1/Terrain/row-2-column-5.png");
+            for(let i = 1; i < 23; i++){
+                createTile(46, i, "Pixel Adventure 1/Terrain/row-2-column-1.png");
+            }
+            createTile(46, 23, "Pixel Adventure 1/Terrain/row-1-column-5.png");
+            for(let i = 1; i < 46; i++){
+                createTile(i, 23, "Pixel Adventure 1/Terrain/row-3-column-2.png");
+            }
+            createTile(0, 23, "Pixel Adventure 1/Terrain/row-1-column-4.png");
+            for(let i = 1; i < 46; i++){
+                createTile(i, 1, "Pixel Adventure 1/Terrain/row-1-column-8.png");
+            }
+            for(let i = 26; i < 46; i++){
+                createTile(i, 2, "Pixel Adventure 1/Terrain/row-1-column-8.png");
+            } 
+            createTile(25, 2, "Pixel Adventure 1/Terrain/row-1-column-7.png");
+            for(let i = 36; i < 46; i++){
+                createTile(i, 3, "Pixel Adventure 1/Terrain/row-1-column-8.png");
+            } 
+            createTile(35, 3, "Pixel Adventure 1/Terrain/row-1-column-7.png");
+            for(let i = 1; i < 16; i++){
+                createTile(i, 5, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+            createTile(16, 5, "Pixel Adventure 1/Terrain/row-1-column-20.png");
+            for(let i = 1; i < 12; i++){
+                createTile(i, 10, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+            createTile(12, 10, "Pixel Adventure 1/Terrain/row-1-column-20.png");
+            for(let i = 6; i < 22; i++){
+                createTile(i, 15, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+            createTile(22, 15, "Pixel Adventure 1/Terrain/row-1-column-20.png");
+            for(let i = 22; i < 28; i++){
+                createTile(i, 10, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+            createTile(28, 10, "Pixel Adventure 1/Terrain/row-1-column-20.png");
+            for(let i = 32; i < 46; i++){
+                createTile(i, 5, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+            for(let i = 38; i < 46; i++){
+                createTile(i, 12, "Pixel Adventure 1/Terrain/row-1-column-19.png");
+            } 
+        }
+
+        const start = () => {
+            buildLevel();
+            lifeCycle();
+        }
+        start();
+    </script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Game</title>
+</head>
+<body>
+    <div id="canvas" oncontextmenu="return false;">
+        <div>
+            <img src="Pixel Adventure 1/Background/BlueBig.png"  style="
+                position: absolute;
+                object-fit: fill;
+                bottom: 0px;
+                left: 0px;
+                width: 100%;
+            "/>
+        </div>
+        <div id="img-Block" style="
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        position: absolute;
+        left: 0px;
+        bottom: 64px;
+        "><img id="hero-img" style="
+            width: 768px;
+            height: 320px;
+            top: 0px;
+            left: -64px;  
+            position: relative;
+            
+            " src="Pixel Adventure 1/Main Characters/Ninja Frog/All.png"/>
+        </div>
+        <div id="jump-block" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 32px;
+            height: 32px;
+            overflow: hidden;
+            opacity: 0.5;
+        ">
+            <img src="Pixel Adventure 1/Main Characters/Ninja Frog/All.png" style="
+                position: absolute;
+                top: -64px;
+                left: -352px;
+                width: 384px;
+                height: 160px;
+                transform: scale(-1,1);
+            "/> 
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 28px;
+                height: 28px;
+                border: 2px solid blue;
+                border-radius: 50%;
+            "></div>
+        </div>
+        <p id="info" style="
+            display: none;
+            position: absolute;
+            left: 64px;
+            top: 96px;
+            background-color: black;
+            color: white;
+            font-size: 20pt;
+            padding: 20px;
+        "></p>
+    </div>
+    <script>
+        //-65
+        //Змінні
+        let rightPosition = 0;
+        let imgBlockPosition = 0;
+        let direction = "right";
+        let jump = false;
+        let timer = null;
+        let fall = false;
+        let x = 0;
+        let halfWidth = window.screen.width / 2;
+        let tileArray = [];
+        let heroX;
+        let heroY;
+
+        let jumpBlock = window.document.querySelector('#jump-block');
+        let hero = window.document.querySelector('#hero-img');
+        let imgBlock = window.document.querySelector('#img-Block');
+        let canvas = window.document.querySelector('#canvas');
+        let info = window.document.querySelector('#info');
+
+        jumpBlock.style.top = `${window.screen.height/2 - 144/2}px`;
+        
+        //Функції
+        hero.onclick = (event) => {
+            event.preventDefault();
+        }
+
+        const updateHeroXY = () => {
+            heroX = Math.ceil((Number.parseInt(imgBlock.style.left)+32)/32);
+            heroY = Math.ceil((Number.parseInt(imgBlock.style.bottom))/32);
+            info.innerText= `heroX = ${heroX}, heroY = ${heroY}`;
+        }
+
+        const checkFalling = () => {
+            updateHeroXY();
+            let isFalling = true;
+            for(let i = 0; i < tileArray.length; i++){
+                tileArray[i][0]
+                if (tileArray[i][0] === heroX && tileArray[i][1]+1 === heroY){
+                    isFalling = false;
+                }
+            }
+            if(isFalling){
+                info.innerText = info.innerText + ', Falling';
+                fall = true;
+            } else {
+                info.innerText = info.innerText + ', not falling';
+                fall = false;
+            }
+        }
+
+        const fallHandler = () => {
+            hero.style.top = '-192px';
+            hero.style.left = '0px';
+            switch(direction){
+                case 'right':{
+                    hero.style.left = '0px';
+                    break;
+                }
+                case 'left':{
+                    hero.style.left = '-704px';
+                    break;
+                }
+                default: break;
+            }
+            imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)-5}px`;
+            checkFalling();
+        }
+
+        const rightHandler = () => {
+            hero.style.transform = "scale(1,1)";
+            rightPosition = rightPosition + 1;
+            if(rightPosition > 11) rightPosition = 0;
+            imgBlockPosition = imgBlockPosition + 1;
+            hero.style.left = `${rightPosition*-64}px`;
+            hero.style.top = '-65px';
+            imgBlock.style.left = `${imgBlockPosition * 10}px`;
+
+            checkFalling();
+        }
+        const leftHandler = () => {
+            hero.style.transform = "scale(-1,1)";
+            rightPosition = rightPosition + 1;
+            if(rightPosition > 11) rightPosition = 0;
+            imgBlockPosition = imgBlockPosition - 1;
+            hero.style.left = `${rightPosition*-64}px`;
+            hero.style.top = '-65px';
+            imgBlock.style.left = `${imgBlockPosition*10}px`;
+
+            
+            checkFalling();
+        }
+        const standHandler = () => {
+            switch(direction){
+                case 'right':{
+                    hero.style.transform = "scale(1,1)";
+                    if(rightPosition > 9) rightPosition = 1;
+                    break;
+                }
+                case 'left':{
+                    hero.style.transform = "scale(-1,1)";
+                    if(rightPosition > 9) rightPosition = 1;
+                    break;
+                }
+                default: break;
+            }
+            
+            rightPosition = rightPosition + 1;
+            hero.style.left = `${rightPosition*-64}px`;
+            hero.style.top = '0px';
+            checkFalling();
+        }
+        const jumpHandler = () => {
+            switch(direction){
+                case 'right':{
+                    hero.style.transform = "scale(1,1)";
+                    hero.style.left = '0px';
+                    imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)+160}px`;
+                    jump = false;
+                    break;
+                }
+                case 'left':{
+                    hero.style.transform = "scale(-1,1)";
+                    hero.style.left = '-704px';
+                    imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom)+160}px`;
+                    jump = false;
+                    break;
+                }
+                default: break;
+            }
+            hero.style.top = '-128px';
+        }
+
+        jumpBlock.onclick = () => {jump = true;}
+        //Обробник івентів
+        let onTouchStart = (event) => {
+            clearInterval(timer);
+            x = (event.type === 'mousedown') ? event.screenX : event.touches[0].screenX;
+            timer = setInterval(()=>{
+                if(x>halfWidth) {
+                    direction = 'right';
+                    rightHandler();
+                } else {
+                    direction = 'left';
+                    leftHandler();
+                }
+            },65)
+        }
+        let onTouchEnd = (event) => {
+            clearInterval(timer);
+            lifeCycle();
+        }
+
+        window.onmousedown = onTouchStart;
+        window.ontouchstart = onTouchStart;
+        window.onmouseup = onTouchEnd;
+        window.ontouchend = onTouchEnd
+
+        const lifeCycle = () => {
+            timer = setInterval(()=>{
+                if (jump){
+                    jumpHandler();
+                } else if (fall){
+                    fallHandler();
+                }
+                else standHandler();
+            }, 80)
+        }
+
+        const createTile = (x, y = 1) => {
+            let tile = window.document.createElement('img');
+            tile.src = 'Pixel Adventure 1/Terrain/row-1-column-8.png';
+            tile.style.position = 'absolute';
+            tile.style.bottom = '32px';
+            tile.width = 32;
+            tile.height = 32;
+            tile.style.left = x*32 + 'px';
+            tile.style.bottom = y*32 + 'px';
+            canvas.appendChild(tile);
+
+            tileArray.push([x, y]);
+        }
+
+        const createTilesPlatform = (startX, startY, length) =>{
+            for (let i = 0; i < length; i++){
+                createTile(startX+i, startY);
+            }
+        }
+
+        const addTiles = (i) => {
+            createTile(i);
+            let tileBlack = window.document.createElement('img')
+            tileBlack.src = 'Pixel Adventure 1/Terrain/row-2-column-8.png';
+            tileBlack.style.position = 'absolute';
+            tileBlack.style.bottom = 0;
+            tileBlack.width = 32;
+            tileBlack.height = 32;
+            tileBlack.style.left = i*32 + 'px';
+            canvas.appendChild(tileBlack);
+        }
+
+        const start = () => {
+            lifeCycle();
+            for(let i = 0; i < 50; i = i + 1){
+                addTiles(i);
+            }
+            createTilesPlatform(10, 10, 10);
+            createTilesPlatform(15, 5, 10);
+        }
+        start();
+    </script>
+</body>
+</html>
